@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숫자 야구 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f1f1f1;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            padding: 20px;
+            margin: auto;
+        }
+        input {
+            padding: 10px;
+            font-size: 18px;
+            margin-right: 10px;
+            width: 100px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #history {
+            margin-top: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>숫자 야구 게임</h1>
+        <p>3자리 숫자를 맞추세요! (중복 없는 숫자)</p>
+        
+        <div id="attempts">남은 시도: 9번</div>
+        
+        <input type="text" id="userInput" maxlength="3" placeholder="숫자 입력">
+        <button id="guessBtn">확인</button>
+        
+        <div id="result"></div>
+        <div id="history"></div>
+    </div>
+
+    <script>
+        let attempts = 9;
+        let correctNumber = generateRandomNumber();
+        let history = [];
+
+        document.getElementById("guessBtn").addEventListener("click", function() {
+            const userInput = document.getElementById("userInput").value;
+
+            if (!isValidInput(userInput)) {
+                alert("중복되지 않은 3자리 숫자를 입력하세요.");
+                return;
+            }
+
+            attempts--;
+            let result = getStrikeBall(userInput, correctNumber);
+
+            history.push(`시도: ${userInput} -> ${result}`);
+            updateUI();
+
+            if (result === "3스트라이크") {
+                alert("🎉 정답입니다! 게임을 종료합니다.");
+                resetGame();
+            } else if (attempts === 0) {
+                alert(`❌ 게임 종료! 정답은 ${correctNumber}였습니다.`);
+                resetGame();
+            }
+        });
+
+        function generateRandomNumber() {
+            let digits = [];
+            while (digits.length < 3) {
+                let randomDigit = Math.floor(Math.random() * 10);
+                if (!digits.includes(randomDigit)) {
+                    digits.push(randomDigit);
+                }
+            }
+            return digits.join('');
+        }
+
+        function isValidInput(input) {
+            if (input.length !== 3 || isNaN(input)) return false;
+            let uniqueDigits = new Set(input);
+            return uniqueDigits.size === 3; // 중복 확인
+        }
+
+        function getStrikeBall(userInput, correctNumber) {
+            let strike = 0;
+            let ball = 0;
+
+            for (let i = 0; i < 3; i++) {
+                if (userInput[i] === correctNumber[i]) {
+                    strike++;
+                } else if (correctNumber.includes(userInput[i])) {
+                    ball++;
+                }
+            }
+
+            return strike === 3 ? "3스트라이크 🎉" : `${strike}스트라이크 ${ball}볼`;
+        }
+
+        function updateUI() {
+            document.getElementById("attempts").innerText = `남은 시도: ${attempts}번`;
+            document.getElementById("result").innerText = history[history.length - 1];
+            document.getElementById("history").innerHTML = history.map(item => `<p>${item}</p>`).join('');
+        }
+
+        function resetGame() {
+            attempts = 9;
+            correctNumber = generateRandomNumber();
+            history = [];
+            document.getElementById("userInput").value = "";
+            updateUI();
+        }
+    </script>
+</body>
+</html>
